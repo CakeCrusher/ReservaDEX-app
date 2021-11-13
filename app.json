@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "ReservaDEX",
+    "slug": "ReservaDEX",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "ReservaDEX"
+}
