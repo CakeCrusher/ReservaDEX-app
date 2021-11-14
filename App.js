@@ -1,47 +1,45 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import React, {useState} from 'react';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import CameraPage from './screens/CameraPage';
 import Home from './screens/Home';
+import {store} from './redux/store';
+import { connect, Provider } from 'react-redux'
+import { NativeBaseProvider, Text, Box, extendTheme } from 'native-base';
 
 const Stack = createNativeStackNavigator();
 
+const newColorTheme = {
+  brand: {
+    900: '#212529',
+    800: '#7c83db',
+    700: '#b3bef6',
+  },
+};
+const theme = extendTheme({ colors: newColorTheme });
+
 export default function App() {
   return (
-    <NavigationContainer theme={{...DefaultTheme, colors: {...DefaultTheme.colors, background: '#222'}}}>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Home"
-          component={Home}
-          options={({navigation}) => ({
-            title: "Home",
-            headerStyle: {backgroundColor: '#222'},
-            headerTitleStyle: {color: '#fff'},
-            headerRight: () => (
-              <TouchableOpacity onPress={() => navigation.navigate('Camera')}>
-                <Text style={styles.navButton}>Camera</Text>
-              </TouchableOpacity>
-            )
-          })}
-        />
-        <Stack.Screen
-          name="Camera"
-          component={CameraPage}
-          options={({navigation}) => ({
-            title: "Camera",
-            headerStyle: {backgroundColor: '#222'},
-            headerTitleStyle: {color: '#fff'},
-            headerRight: () => (
-            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-              <Text style={styles.navButton}>Home</Text>
-            </TouchableOpacity>
-            )
-          })}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store} >
+      <NativeBaseProvider theme={theme}>
+        <NavigationContainer >
+          <Stack.Navigator>
+            <Stack.Screen
+              name="Home"
+              component={Home}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="Camera"
+              component={CameraPage}
+              options={{headerShown: false}}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </NativeBaseProvider>
+    </Provider>
   );
 }
 
@@ -52,4 +50,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  text: {
+    fontSize: 20,
+    color: 'white',
+  }
 });

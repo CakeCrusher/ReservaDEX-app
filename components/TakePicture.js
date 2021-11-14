@@ -1,106 +1,100 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { StyleSheet, View, Button, Text, TouchableOpacity, ScrollView, Image, Flex } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, ScrollView, Image, Flex } from 'react-native'
 import { Camera } from 'expo-camera';
 import * as FileSystem from 'expo-file-system'
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
+import * as Location from 'expo-location';
+import { connect, Provider } from 'react-redux'
+import { setImageUri } from '../redux/actions/imageUri'
+import { NativeBaseProvider, Text, Box, Heading, Center,NBBox, Button } from 'native-base';
+import { Entypo } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
-
-const TakePicture = ({setImageUri, children}) => {
+const TakePicture = ({setImageUri, organization, children}) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
+  const [location, setLocation] = useState(null);
   const ref = useRef(null);
-  const navigation = useNavigation()
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestPermissionsAsync();
       setHasPermission(status === 'granted');
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
     })();
   }, [])
 
   const sendPhoto = async (uri, width, height) => {
     const picture = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-    console.log('PICTUREE',picture);
     const payload = {
-      userId: 'GARBAGE',
+      lat: location.coords.latitude,
+      lng: location.coords.longitude,
       file: picture,
+      orgId: organization.id
     }
-    const res = await fetch('http://reservadex-api.azurewebsites.net/file/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    })
-    axios.post(`http://reservadex-api.azurewebsites.net/file/upload`, payload)
-        .then((res) => {
-                console.log('res:', res.data)
-            }).catch(err => {
-                console.log('err:', err)
-            })
-    // console.log('res: ', res);
-
-    // write a payload json to a json file'
-
-    // SEND TO BACKEND HERE
-    // const analyzePicture = await fetch('https://api.com/analyze_picture', {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     height: Int,
-    //     width: Int,
-    //     picture: String,
-    //   }),
-    // });
-    // WILL PROCESS AS FOLLOWS
-    // prediction of animal as label and square signaling location
-    // navigation.navigate('Analysis')}
-    setImageUri(uri);
+    const organizationData = await axios.post('https://reservadex-api.azurewebsites.net/engine/encounter', payload)
+    console.log(organizationData.data.match);
+    setImageUri({imageUri: uri});
   }
   const snap = async () => {
     let photo = await ref.current.takePictureAsync();
-    console.log(photo);
     const uri = photo.uri;
     await sendPhoto(uri);
   };
 
-  if (hasPermission === null) {
-    return <View />;
+  if (hasPermission === null || !location || (!organization.lat && organization.lat !== 0)) {
+    return <Text>Loading...</Text>;
   }
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
   }
   return (
     <View style={styles.container}>
-          <Camera
-            style={styles.camera} type={type}
-            ref={ref}
-          >
-            <View style={styles.overlayContainer}>
-              <TouchableOpacity
-              style={{...styles.button, ...styles.flip}}
-              onPress={() => {
-                setType(
-                  type === Camera.Constants.Type.back
-                    ? Camera.Constants.Type.front
-                    : Camera.Constants.Type.back
-                );
-              }}>
-                <Text style={styles.text}> Flip </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{...styles.button, ...styles.snap}}
-                onPress={snap}>
-                <Text style={styles.text}> Snap </Text>
-              </TouchableOpacity>
-              {children}
+        <Camera
+          style={styles.camera} type={type}
+          ref={ref}
+        >
+          <View style={styles.overlayContainer}>
+            <TouchableOpacity
+            style={{...styles.button, ...styles.flip}}
+            onPress={() => {
+              setType(
+                type === Camera.Constants.Type.back
+                  ? Camera.Constants.Type.front
+                  : Camera.Constants.Type.back
+              );
+            }}>
+              <MaterialIcons name="flip-camera-android" size={28} color="white" />
+            </TouchableOpacity>
+            <View style={styles.cameraContainer}>
+            <Center>
+              <Button style={styles.cameraButton} onPress={snap}>
+                <Entypo name="picasa" size={34} color="white" />
+              </Button>
+            </Center>
             </View>
+            {children}
+          </View>
         </Camera>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+    cameraContainer: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    width: '100%',
+  },
+  cameraButton: {
+    borderRadius: 10,
+    width: 70,
+    height: 55,
+    backgroundColor: '#7c83db'
+  },
   container: {
     height: '100%',
     width: '100%',
@@ -121,15 +115,23 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     bottom: 100,
-    backgroundColor: 'red',
-    opacity: 0.8,
     borderRadius: 10,
   },
   snap: {
     left: '50%',
   },
   flip: {
-    right: 0,
+    right: 20,
+    bottom: 20,
   }
 })
-export default TakePicture
+
+const mapStateToProps = (state) => ({
+  organization: state.organization,
+  imageUri: state.imageUri,
+})
+const mapDispatchToProps = (dispatch) => ({
+  setImageUri: (imageUri) => dispatch(setImageUri(imageUri)),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(TakePicture)
