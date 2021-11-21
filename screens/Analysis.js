@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
 import { NativeBaseProvider, Text, Box, Heading, Center,NBBox, Button } from 'native-base';
 import { connect, Provider } from 'react-redux'
-import { setOrganization } from '../redux/actions/organization'
-import { setImageUri } from '../redux/actions/imageUri'
-import { setSpecies } from '../redux/actions/species'
+import { setCustomer } from '../redux/actions/customer';
+import { setWishlist } from '../redux/actions/wishlist';
+import { setOffers } from '../redux/actions/offers';
 
 
 const Analysis = (props) => {
@@ -29,14 +29,14 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = (state) => ({
-  organization: state.organization,
-  imageUri: state.imageUri,
-  species: state.species,
+  customer: state.customer,
+  wishlist: state.wishlist,
+  offers: state.offers,
 })
 const mapDispatchToProps = (dispatch) => ({
-  setOrganization: (organization) => dispatch(setOrganization(organization)),
-  setImageUri: (imageUri) => dispatch(setImageUri(imageUri)),
-  setSpecies: (species) => dispatch(setSpecies(species)),
+  setCustomer: (customer) => dispatch(setCustomer(customer)),
+  setWishlist: (wishlist) => dispatch(setWishlist(wishlist)),
+  setOffers: (offers) => dispatch(setOffers(offers)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(CameraPage)

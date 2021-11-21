@@ -2,14 +2,13 @@ import { createStore, applyMiddleware } from 'redux'
 import { combineReducers } from 'redux'
 import thunk from 'redux-thunk'
 
-import organization from './reducers/organization'
-import imageUri from './reducers/imageUri'
-import species from './reducers/species'
-
+import customer from './reducers/customer'
+import wishlist from './reducers/wishlist'
+import offers from './reducers/offers'
 const combinedReducers = combineReducers({
-  organization: organization,
-  imageUri: imageUri,
-  species: species,
+  customer: customer,
+  wishlist: wishlist,
+  offers: offers,
 })
 
 const store = createStore(

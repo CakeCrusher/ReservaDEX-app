@@ -6,7 +6,7 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "permissions": ["CAMERA", "LOCATION"]
+    "permissions": ["LOCATION"]
   },
   "name": "ReservaDEX"
 }

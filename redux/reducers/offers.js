@@ -1,15 +1,15 @@
-const species = (state = {
-  species: []
+const offers = (state = {
+  offers: []
 }, action) => {
   switch (action.type) {
-    case 'SET_SPECIES':
+    case 'SET_OFFERS':
       return {
         ...state,
-        species: action.species
+        offers: action.offers
       };
     default:
       return state;
   }
 }
 
-export default species
+export default offers
